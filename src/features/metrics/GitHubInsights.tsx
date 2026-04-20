@@ -1,6 +1,5 @@
 "use client";
 
-import { AchievementsGrid } from "@/features/achievements/AchievementsGrid";
 import { useGitHubData } from "@/hooks/useGitHubData";
 
 import { ContributionGraph } from "./ContributionGraph";
@@ -20,28 +19,12 @@ function MetricsSkeleton() {
           />
         ))}
       </div>
-      <div className="mt-4 grid gap-4 xl:grid-cols-[2fr_1fr]">
+      <div className="mt-4 space-y-4">
         <div className="h-[230px] animate-pulse rounded-xl border border-(--border) bg-(--bg-primary)" />
-        <div className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="h-[130px] animate-pulse rounded-xl border border-(--border) bg-(--bg-primary)" />
           <div className="h-[130px] animate-pulse rounded-xl border border-(--border) bg-(--bg-primary)" />
         </div>
-      </div>
-    </section>
-  );
-}
-
-function AchievementsSkeleton() {
-  return (
-    <section className="rounded-2xl border border-(--border-bright) bg-(--bg-elevated) p-5 md:p-6">
-      <div className="mb-4 h-6 w-40 animate-pulse rounded bg-(--bg-primary)" />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 12 }).map((_, index) => (
-          <div
-            key={`achievement-skeleton-${index}`}
-            className="h-28 animate-pulse rounded-xl border border-(--border) bg-(--bg-primary)"
-          />
-        ))}
       </div>
     </section>
   );
@@ -51,12 +34,7 @@ export function GitHubInsights() {
   const query = useGitHubData({ enabled: true });
 
   if (query.isPending) {
-    return (
-      <div className="space-y-6">
-        <MetricsSkeleton />
-        <AchievementsSkeleton />
-      </div>
-    );
+    return <MetricsSkeleton />;
   }
 
   if (query.isError || !query.data) {
@@ -79,41 +57,38 @@ export function GitHubInsights() {
     );
   }
 
-  const { metrics, achievements, hasGraphData } = query.data;
+  const { metrics, hasGraphData } = query.data;
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-2xl border border-(--border-bright) bg-(--bg-elevated) p-5 md:p-6">
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <h2 className="text-lg font-semibold tracking-[-0.02em]">
-            Metricas GitHub
-          </h2>
-          <span className="text-xs text-(--text-secondary)">
-            Atualizado em{" "}
-            {new Date(metrics.lastUpdated).toLocaleString("pt-BR", {
-              hour12: false,
-            })}
-          </span>
-        </div>
+    <section className="rounded-2xl border border-(--border-bright) bg-(--bg-elevated) p-5 md:p-6">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <h2 className="text-lg font-semibold tracking-[-0.02em]">
+          Metricas GitHub
+        </h2>
+        <span className="text-xs text-(--text-secondary)">
+          Atualizado em{" "}
+          {new Date(metrics.lastUpdated).toLocaleString("pt-BR", {
+            hour12: false,
+          })}
+        </span>
+      </div>
 
-        <StatCards metrics={metrics} />
+      <StatCards metrics={metrics} />
 
-        <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-          <ContributionGraph
+      <div className="mt-4 space-y-4">
+        <ContributionGraph
+          calendar={metrics.contributionCalendar}
+          hasGraphData={hasGraphData}
+        />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <LanguageBar languages={metrics.languages} />
+          <StreakCounter
+            streak={metrics.streak}
             calendar={metrics.contributionCalendar}
-            hasGraphData={hasGraphData}
           />
-          <div className="min-w-0 space-y-4">
-            <LanguageBar languages={metrics.languages} />
-            <StreakCounter
-              streak={metrics.streak}
-              calendar={metrics.contributionCalendar}
-            />
-          </div>
         </div>
-      </section>
-
-      <AchievementsGrid achievements={achievements} />
-    </div>
+      </div>
+    </section>
   );
 }

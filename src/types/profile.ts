@@ -1,4 +1,4 @@
-export type TabId = "projects" | "certificates" | "events";
+export type TabId = "projects" | "certificates" | "events" | "achievements";
 
 export type StatusColor = "green" | "yellow" | "blue" | "red";
 

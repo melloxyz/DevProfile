@@ -1,24 +1,6 @@
 "use client";
 
-import {
-  DndContext,
-  KeyboardSensor,
-  PointerSensor,
-  closestCenter,
-  type DragEndEvent,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import type { CSSProperties } from "react";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
 import { DEFAULT_LINKS } from "@/config/defaults";
 import type { QuickLink } from "@/types/profile";
@@ -28,45 +10,9 @@ type QuickLinksProps = {
   links?: QuickLink[];
 };
 
-type SortableItemProps = {
-  link: QuickLink;
-};
-
-function SortableLinkItem({ link }: SortableItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: link.id,
-  });
-
-  const style: CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
+function QuickLinkItem({ link }: { link: QuickLink }) {
   return (
-    <li
-      ref={setNodeRef}
-      style={style}
-      className={`group flex items-center gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-elevated)] p-3 transition-colors hover:border-[color:var(--border-bright)] ${
-        isDragging ? "opacity-70" : ""
-      }`}
-    >
-      <button
-        type="button"
-        aria-label={`Arrastar link ${link.label}`}
-        className="grid h-8 w-8 place-items-center rounded-md border border-[color:var(--border)] font-[family-name:var(--font-geist-mono)] text-xs text-[color:var(--text-secondary)] transition-colors hover:border-[color:var(--border-bright)] hover:text-[color:var(--text-primary)]"
-        {...attributes}
-        {...listeners}
-      >
-        :::
-      </button>
-
+    <li className="group flex items-center gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-elevated)] p-3 transition-colors hover:border-[color:var(--border-bright)]">
       <span className="grid h-8 w-8 place-items-center rounded-md bg-[color:var(--accent-dim)] font-[family-name:var(--font-geist-mono)] text-xs font-semibold text-[color:var(--accent)]">
         {link.iconText}
       </span>
@@ -106,49 +52,7 @@ export function QuickLinks({
   isLoading,
   links: providedLinks,
 }: QuickLinksProps) {
-  const [links, setLinks] = useState<QuickLink[]>(
-    providedLinks ?? DEFAULT_LINKS,
-  );
-
-  useEffect(() => {
-    if (providedLinks) {
-      setLinks(providedLinks);
-    }
-  }, [providedLinks]);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 6,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) {
-      return;
-    }
-
-    setLinks((currentLinks) => {
-      const oldIndex = currentLinks.findIndex(
-        (item) => item.id === String(active.id),
-      );
-      const newIndex = currentLinks.findIndex(
-        (item) => item.id === String(over.id),
-      );
-
-      if (oldIndex === -1 || newIndex === -1) {
-        return currentLinks;
-      }
-
-      return arrayMove(currentLinks, oldIndex, newIndex);
-    });
-  }
+  const links = useMemo(() => providedLinks ?? DEFAULT_LINKS, [providedLinks]);
 
   if (isLoading) {
     return <QuickLinksSkeleton />;
@@ -164,25 +68,14 @@ export function QuickLinks({
       </div>
 
       <p className="mb-4 text-sm text-[color:var(--text-secondary)]">
-        Reordene os links arrastando o handle a esquerda.
+        A ordem dos links e definida no painel admin.
       </p>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={links.map((link) => link.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <ul className="space-y-3">
-            {links.map((link) => (
-              <SortableLinkItem key={link.id} link={link} />
-            ))}
-          </ul>
-        </SortableContext>
-      </DndContext>
+      <ul className="space-y-3">
+        {links.map((link) => (
+          <QuickLinkItem key={link.id} link={link} />
+        ))}
+      </ul>
     </section>
   );
 }

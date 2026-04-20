@@ -16,6 +16,15 @@ export const dynamic = "force-dynamic";
 
 const BCRYPT_SALT_ROUNDS = 12;
 
+const PROFILE_LIMITS = {
+  displayName: 48,
+  username: 32,
+  bio: 240,
+  statusText: 80,
+  bannerUrl: 240,
+  adminPassword: 128,
+} as const;
+
 type ProfilePatchBody = {
   displayName?: string;
   username?: string;
@@ -113,6 +122,30 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     (body.statusColor !== undefined && !statusColor)
   ) {
     return badRequestResponse("Campos de perfil invalidos.");
+  }
+
+  if (displayName && displayName.length > PROFILE_LIMITS.displayName) {
+    return badRequestResponse("Display Name excede o limite de caracteres.");
+  }
+
+  if (username && username.length > PROFILE_LIMITS.username) {
+    return badRequestResponse("Username excede o limite de caracteres.");
+  }
+
+  if (bio && bio.length > PROFILE_LIMITS.bio) {
+    return badRequestResponse("Bio excede o limite de caracteres.");
+  }
+
+  if (statusText && statusText.length > PROFILE_LIMITS.statusText) {
+    return badRequestResponse("Status Text excede o limite de caracteres.");
+  }
+
+  if (bannerUrl && bannerUrl.length > PROFILE_LIMITS.bannerUrl) {
+    return badRequestResponse("Banner URL excede o limite de caracteres.");
+  }
+
+  if (adminPassword && adminPassword.length > PROFILE_LIMITS.adminPassword) {
+    return badRequestResponse("Senha excede o limite de caracteres.");
   }
 
   if (adminPassword && adminPassword.length < 8) {

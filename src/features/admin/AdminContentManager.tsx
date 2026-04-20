@@ -6,9 +6,18 @@ import {
   ADMIN_CSRF_HEADER,
   ADMIN_ROUTE_SLUG_HEADER,
 } from "@/lib/admin/constants";
+import {
+  CredentialsEditorModal,
+  ProjectsEditorModal,
+  QuickLinksEditorModal,
+} from "@/features/admin/AdminCollectionModals";
 import type {
+  Certificate,
+  EventItem,
   ProfileData,
+  Project,
   PublicContentSnapshot,
+  QuickLink,
   StatusColor,
 } from "@/types/profile";
 
@@ -24,6 +33,15 @@ type Notice = {
 };
 
 const STATUS_OPTIONS: StatusColor[] = ["green", "yellow", "blue", "red"];
+
+const PROFILE_LIMITS = {
+  displayName: 48,
+  username: 32,
+  bio: 240,
+  statusText: 80,
+  bannerUrl: 240,
+  adminPassword: 128,
+} as const;
 
 function toPrettyJson(value: unknown): string {
   return JSON.stringify(value, null, 2);
@@ -44,6 +62,23 @@ function NoticeBox({ notice }: { notice: Notice | null }) {
       {notice.message}
     </p>
   );
+}
+
+function CharCount({ current, max }: { current: number; max: number }) {
+  return (
+    <span className="text-[11px] text-(--text-muted)">
+      {current}/{max}
+    </span>
+  );
+}
+
+function parseArrayOrEmpty<T>(jsonText: string): T[] {
+  try {
+    const parsed = JSON.parse(jsonText) as unknown;
+    return Array.isArray(parsed) ? (parsed as T[]) : [];
+  } catch {
+    return [];
+  }
 }
 
 export function AdminContentManager({
@@ -88,6 +123,11 @@ export function AdminContentManager({
   const [isSavingCertificates, setIsSavingCertificates] = useState(false);
   const [isSavingEvents, setIsSavingEvents] = useState(false);
   const [isBackupBusy, setIsBackupBusy] = useState(false);
+
+  const [isQuickLinksModalOpen, setIsQuickLinksModalOpen] = useState(false);
+  const [isProjectsModalOpen, setIsProjectsModalOpen] = useState(false);
+  const [isCertificatesModalOpen, setIsCertificatesModalOpen] = useState(false);
+  const [isEventsModalOpen, setIsEventsModalOpen] = useState(false);
 
   const [backupFile, setBackupFile] = useState<File | null>(null);
 
@@ -186,7 +226,7 @@ export function AdminContentManager({
     endpoint: string,
     jsonText: string,
     setNotice: (notice: Notice | null) => void,
-  ): Promise<void> {
+  ): Promise<boolean> {
     setNotice(null);
 
     let parsed: unknown;
@@ -198,7 +238,7 @@ export function AdminContentManager({
         type: "error",
         message: "JSON invalido para esta secao.",
       });
-      return;
+      return false;
     }
 
     try {
@@ -216,6 +256,7 @@ export function AdminContentManager({
         type: "success",
         message: "Colecao atualizada com sucesso.",
       });
+      return true;
     } catch (error) {
       setNotice({
         type: "error",
@@ -224,6 +265,7 @@ export function AdminContentManager({
             ? error.message
             : "Falha ao atualizar colecao.",
       });
+      return false;
     }
   }
 
@@ -402,6 +444,11 @@ export function AdminContentManager({
                   }))
                 }
                 className="rounded-lg border border-(--border) bg-(--bg-elevated) px-3 py-2 text-sm outline-none focus:border-(--accent)"
+                maxLength={PROFILE_LIMITS.displayName}
+              />
+              <CharCount
+                current={profileForm.displayName.length}
+                max={PROFILE_LIMITS.displayName}
               />
             </label>
 
@@ -416,6 +463,11 @@ export function AdminContentManager({
                   }))
                 }
                 className="rounded-lg border border-(--border) bg-(--bg-elevated) px-3 py-2 text-sm outline-none focus:border-(--accent)"
+                maxLength={PROFILE_LIMITS.username}
+              />
+              <CharCount
+                current={profileForm.username.length}
+                max={PROFILE_LIMITS.username}
               />
             </label>
           </div>
@@ -432,6 +484,11 @@ export function AdminContentManager({
               }
               rows={3}
               className="rounded-lg border border-(--border) bg-(--bg-elevated) px-3 py-2 text-sm outline-none focus:border-(--accent)"
+              maxLength={PROFILE_LIMITS.bio}
+            />
+            <CharCount
+              current={profileForm.bio.length}
+              max={PROFILE_LIMITS.bio}
             />
           </label>
 
@@ -447,6 +504,11 @@ export function AdminContentManager({
                   }))
                 }
                 className="rounded-lg border border-(--border) bg-(--bg-elevated) px-3 py-2 text-sm outline-none focus:border-(--accent)"
+                maxLength={PROFILE_LIMITS.statusText}
+              />
+              <CharCount
+                current={profileForm.statusText.length}
+                max={PROFILE_LIMITS.statusText}
               />
             </label>
 
@@ -483,6 +545,11 @@ export function AdminContentManager({
               }
               placeholder="https://..."
               className="rounded-lg border border-(--border) bg-(--bg-elevated) px-3 py-2 text-sm outline-none focus:border-(--accent)"
+              maxLength={PROFILE_LIMITS.bannerUrl}
+            />
+            <CharCount
+              current={(profileForm.bannerUrl ?? "").length}
+              max={PROFILE_LIMITS.bannerUrl}
             />
           </label>
 
@@ -499,6 +566,11 @@ export function AdminContentManager({
               }
               autoComplete="new-password"
               className="rounded-lg border border-(--border) bg-(--bg-elevated) px-3 py-2 text-sm outline-none focus:border-(--accent)"
+              maxLength={PROFILE_LIMITS.adminPassword}
+            />
+            <CharCount
+              current={profileForm.adminPassword.length}
+              max={PROFILE_LIMITS.adminPassword}
             />
           </label>
 
@@ -516,35 +588,38 @@ export function AdminContentManager({
 
       <section className="rounded-2xl border border-(--border) bg-(--bg-primary) p-4 sm:p-5">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-(--text-muted)">
-          Quick Links (JSON)
+          Quick Links
         </h2>
         <p className="mt-1 text-xs text-(--text-secondary)">
-          Edite a lista em JSON. A ordem do array define a ordem de exibicao.
+          Edicao visual com drag-and-drop disponivel apenas no painel admin.
         </p>
 
-        <textarea
-          value={quickLinksJson}
-          onChange={(event) => setQuickLinksJson(event.target.value)}
-          rows={10}
-          className="mt-3 w-full rounded-xl border border-(--border) bg-(--bg-elevated) px-3 py-2 font-[family-name:var(--font-geist-mono)] text-xs outline-none focus:border-(--accent)"
-        />
+        <div className="mt-3 rounded-xl border border-(--border) bg-(--bg-elevated) p-3">
+          <p className="text-xs text-(--text-secondary)">
+            Total de links:{" "}
+            {parseArrayOrEmpty<QuickLink>(quickLinksJson).length}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {parseArrayOrEmpty<QuickLink>(quickLinksJson)
+              .slice(0, 5)
+              .map((item) => (
+                <span
+                  key={`${item.id}-${item.label}`}
+                  className="rounded-md border border-(--border) px-2 py-1 text-[11px] text-(--text-secondary)"
+                >
+                  {item.label}
+                </span>
+              ))}
+          </div>
+        </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <button
             type="button"
-            onClick={async () => {
-              setIsSavingQuickLinks(true);
-              await saveCollection(
-                "/api/admin/quick-links",
-                quickLinksJson,
-                setQuickLinksNotice,
-              );
-              setIsSavingQuickLinks(false);
-            }}
-            disabled={isSavingQuickLinks}
+            onClick={() => setIsQuickLinksModalOpen(true)}
             className="rounded-full border border-(--accent) bg-(--accent-dim) px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-(--accent) disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSavingQuickLinks ? "Salvando..." : "Salvar quick links"}
+            Abrir editor visual
           </button>
 
           <NoticeBox notice={quickLinksNotice} />
@@ -553,36 +628,39 @@ export function AdminContentManager({
 
       <section className="rounded-2xl border border-(--border) bg-(--bg-primary) p-4 sm:p-5">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-(--text-muted)">
-          Projetos (JSON)
+          Projetos
         </h2>
         <p className="mt-1 text-xs text-(--text-secondary)">
-          A vitrine publica de projetos agora prioriza repositorios publicos da
-          API do GitHub (mais recente para mais antigo). Este JSON fica como
-          fallback manual.
+          Editor visual para projetos fallback. A vitrine publica prioriza
+          repositorios da API GitHub.
         </p>
-        <textarea
-          value={projectsJson}
-          onChange={(event) => setProjectsJson(event.target.value)}
-          rows={12}
-          className="mt-3 w-full rounded-xl border border-(--border) bg-(--bg-elevated) px-3 py-2 font-[family-name:var(--font-geist-mono)] text-xs outline-none focus:border-(--accent)"
-        />
+
+        <div className="mt-3 rounded-xl border border-(--border) bg-(--bg-elevated) p-3">
+          <p className="text-xs text-(--text-secondary)">
+            Total de projetos fallback:{" "}
+            {parseArrayOrEmpty<Project>(projectsJson).length}
+          </p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            {parseArrayOrEmpty<Project>(projectsJson)
+              .slice(0, 4)
+              .map((item) => (
+                <p
+                  key={`${item.id}-${item.name}`}
+                  className="truncate rounded-md border border-(--border) px-2 py-1 text-[11px] text-(--text-secondary)"
+                >
+                  {item.name}
+                </p>
+              ))}
+          </div>
+        </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <button
             type="button"
-            onClick={async () => {
-              setIsSavingProjects(true);
-              await saveCollection(
-                "/api/admin/projects",
-                projectsJson,
-                setProjectsNotice,
-              );
-              setIsSavingProjects(false);
-            }}
-            disabled={isSavingProjects}
+            onClick={() => setIsProjectsModalOpen(true)}
             className="rounded-full border border-(--accent) bg-(--accent-dim) px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-(--accent) disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSavingProjects ? "Salvando..." : "Salvar projetos"}
+            Abrir editor visual
           </button>
 
           <NoticeBox notice={projectsNotice} />
@@ -591,35 +669,38 @@ export function AdminContentManager({
 
       <section className="rounded-2xl border border-(--border) bg-(--bg-primary) p-4 sm:p-5">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-(--text-muted)">
-          Certificados (JSON)
+          Certificados
         </h2>
         <p className="mt-1 text-xs text-(--text-secondary)">
-          Campos obrigatorios: titulo, instituicao, emitido_em,
-          codigo_credencial, url_validador.
+          Editor visual para adicionar, editar e remover certificados.
         </p>
-        <textarea
-          value={certificatesJson}
-          onChange={(event) => setCertificatesJson(event.target.value)}
-          rows={12}
-          className="mt-3 w-full rounded-xl border border-(--border) bg-(--bg-elevated) px-3 py-2 font-[family-name:var(--font-geist-mono)] text-xs outline-none focus:border-(--accent)"
-        />
+
+        <div className="mt-3 rounded-xl border border-(--border) bg-(--bg-elevated) p-3">
+          <p className="text-xs text-(--text-secondary)">
+            Total de certificados:{" "}
+            {parseArrayOrEmpty<Certificate>(certificatesJson).length}
+          </p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            {parseArrayOrEmpty<Certificate>(certificatesJson)
+              .slice(0, 4)
+              .map((item) => (
+                <p
+                  key={`${item.codigo_credencial}-${item.titulo}`}
+                  className="truncate rounded-md border border-(--border) px-2 py-1 text-[11px] text-(--text-secondary)"
+                >
+                  {item.titulo}
+                </p>
+              ))}
+          </div>
+        </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <button
             type="button"
-            onClick={async () => {
-              setIsSavingCertificates(true);
-              await saveCollection(
-                "/api/admin/certificates",
-                certificatesJson,
-                setCertificatesNotice,
-              );
-              setIsSavingCertificates(false);
-            }}
-            disabled={isSavingCertificates}
+            onClick={() => setIsCertificatesModalOpen(true)}
             className="rounded-full border border-(--accent) bg-(--accent-dim) px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-(--accent) disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSavingCertificates ? "Salvando..." : "Salvar certificados"}
+            Abrir editor visual
           </button>
 
           <NoticeBox notice={certificatesNotice} />
@@ -628,35 +709,37 @@ export function AdminContentManager({
 
       <section className="rounded-2xl border border-(--border) bg-(--bg-primary) p-4 sm:p-5">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-(--text-muted)">
-          Eventos (JSON)
+          Eventos
         </h2>
         <p className="mt-1 text-xs text-(--text-secondary)">
-          Campos obrigatorios: titulo, instituicao, emitido_em,
-          codigo_credencial, url_validador.
+          Editor visual para adicionar, editar e remover eventos.
         </p>
-        <textarea
-          value={eventsJson}
-          onChange={(event) => setEventsJson(event.target.value)}
-          rows={12}
-          className="mt-3 w-full rounded-xl border border-(--border) bg-(--bg-elevated) px-3 py-2 font-[family-name:var(--font-geist-mono)] text-xs outline-none focus:border-(--accent)"
-        />
+
+        <div className="mt-3 rounded-xl border border-(--border) bg-(--bg-elevated) p-3">
+          <p className="text-xs text-(--text-secondary)">
+            Total de eventos: {parseArrayOrEmpty<EventItem>(eventsJson).length}
+          </p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            {parseArrayOrEmpty<EventItem>(eventsJson)
+              .slice(0, 4)
+              .map((item) => (
+                <p
+                  key={`${item.codigo_credencial}-${item.titulo}`}
+                  className="truncate rounded-md border border-(--border) px-2 py-1 text-[11px] text-(--text-secondary)"
+                >
+                  {item.titulo}
+                </p>
+              ))}
+          </div>
+        </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <button
             type="button"
-            onClick={async () => {
-              setIsSavingEvents(true);
-              await saveCollection(
-                "/api/admin/events",
-                eventsJson,
-                setEventsNotice,
-              );
-              setIsSavingEvents(false);
-            }}
-            disabled={isSavingEvents}
+            onClick={() => setIsEventsModalOpen(true)}
             className="rounded-full border border-(--accent) bg-(--accent-dim) px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-(--accent) disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSavingEvents ? "Salvando..." : "Salvar eventos"}
+            Abrir editor visual
           </button>
 
           <NoticeBox notice={eventsNotice} />
@@ -708,6 +791,100 @@ export function AdminContentManager({
           <NoticeBox notice={backupNotice} />
         </div>
       </section>
+
+      <QuickLinksEditorModal
+        isOpen={isQuickLinksModalOpen}
+        initialItems={parseArrayOrEmpty<QuickLink>(quickLinksJson)}
+        isSaving={isSavingQuickLinks}
+        onClose={() => setIsQuickLinksModalOpen(false)}
+        onSave={async (items) => {
+          setIsSavingQuickLinks(true);
+          const nextJson = toPrettyJson(items);
+          setQuickLinksJson(nextJson);
+          const ok = await saveCollection(
+            "/api/admin/quick-links",
+            nextJson,
+            setQuickLinksNotice,
+          );
+          setIsSavingQuickLinks(false);
+
+          if (ok) {
+            setIsQuickLinksModalOpen(false);
+          }
+        }}
+      />
+
+      <ProjectsEditorModal
+        isOpen={isProjectsModalOpen}
+        initialItems={parseArrayOrEmpty<Project>(projectsJson)}
+        isSaving={isSavingProjects}
+        onClose={() => setIsProjectsModalOpen(false)}
+        onSave={async (items) => {
+          setIsSavingProjects(true);
+          const nextJson = toPrettyJson(items);
+          setProjectsJson(nextJson);
+          const ok = await saveCollection(
+            "/api/admin/projects",
+            nextJson,
+            setProjectsNotice,
+          );
+          setIsSavingProjects(false);
+
+          if (ok) {
+            setIsProjectsModalOpen(false);
+          }
+        }}
+      />
+
+      <CredentialsEditorModal
+        isOpen={isCertificatesModalOpen}
+        title="Certificados"
+        description="Edite certificados sem precisar manipular JSON manualmente."
+        saveLabel="Salvar certificados"
+        initialItems={parseArrayOrEmpty<Certificate>(certificatesJson)}
+        isSaving={isSavingCertificates}
+        onClose={() => setIsCertificatesModalOpen(false)}
+        onSave={async (items) => {
+          setIsSavingCertificates(true);
+          const nextJson = toPrettyJson(items);
+          setCertificatesJson(nextJson);
+          const ok = await saveCollection(
+            "/api/admin/certificates",
+            nextJson,
+            setCertificatesNotice,
+          );
+          setIsSavingCertificates(false);
+
+          if (ok) {
+            setIsCertificatesModalOpen(false);
+          }
+        }}
+      />
+
+      <CredentialsEditorModal
+        isOpen={isEventsModalOpen}
+        title="Eventos"
+        description="Edite eventos sem precisar manipular JSON manualmente."
+        saveLabel="Salvar eventos"
+        initialItems={parseArrayOrEmpty<EventItem>(eventsJson)}
+        isSaving={isSavingEvents}
+        onClose={() => setIsEventsModalOpen(false)}
+        onSave={async (items) => {
+          setIsSavingEvents(true);
+          const nextJson = toPrettyJson(items);
+          setEventsJson(nextJson);
+          const ok = await saveCollection(
+            "/api/admin/events",
+            nextJson,
+            setEventsNotice,
+          );
+          setIsSavingEvents(false);
+
+          if (ok) {
+            setIsEventsModalOpen(false);
+          }
+        }}
+      />
     </div>
   );
 }

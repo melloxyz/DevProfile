@@ -8,7 +8,10 @@ import { AdminLogoutButton } from "@/features/admin/AdminLogoutButton";
 import { ADMIN_SESSION_COOKIE_NAME } from "@/lib/admin/constants";
 import { verifyAdminSessionToken } from "@/lib/admin/session";
 import { serverEnv } from "@/lib/env.server";
-import { readPublicContentSnapshot } from "@/lib/storage-server";
+import {
+  PUBLIC_CONTENT_CACHE_TAG,
+  readPublicContentSnapshotCached,
+} from "@/lib/storage-server";
 
 export const dynamic = "force-dynamic";
 
@@ -54,11 +57,19 @@ export default async function AdminDashboardPage({
     notFound();
   }
 
-  const snapshot = await readPublicContentSnapshot();
+  const snapshot = await readPublicContentSnapshotCached();
 
   const expiresAt = new Date(session.expiresAt * 1000).toLocaleString("pt-BR", {
     hour12: false,
+    timeZone: "UTC",
   });
+  const snapshotUpdatedAt = new Date(snapshot.updatedAt).toLocaleString(
+    "pt-BR",
+    {
+      hour12: false,
+      timeZone: "UTC",
+    },
+  );
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -73,35 +84,38 @@ export default async function AdminDashboardPage({
         </div>
 
         <p className="text-sm text-(--text-secondary)">
-          Rota oculta validada por slug server-side. Sessao HttpOnly com
-          expiração em {expiresAt}.
+          Rota oculta validada por slug server-side. Sessao HttpOnly ativa ate{" "}
+          {expiresAt} (UTC).
         </p>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <article className="rounded-xl border border-(--border) bg-(--bg-primary) p-4">
             <p className="text-xs uppercase tracking-[0.14em] text-(--text-muted)">
-              Fase 4
+              Snapshot publico
             </p>
             <p className="mt-2 text-sm">
-              CRUD de perfil e colecoes administrativas
+              Ultima atualizacao: {snapshotUpdatedAt} (UTC)
             </p>
           </article>
 
           <article className="rounded-xl border border-(--border) bg-(--bg-primary) p-4">
             <p className="text-xs uppercase tracking-[0.14em] text-(--text-muted)">
-              Segurança
+              Conteudo
             </p>
             <p className="mt-2 text-sm">
-              Origin/Referer + CSRF aplicado nas rotas de mutacao.
+              {snapshot.quickLinks.length} links • {snapshot.projects.length}{" "}
+              projetos fallback • {snapshot.certificates.length} certificados •{" "}
+              {snapshot.events.length} eventos
             </p>
           </article>
 
           <article className="rounded-xl border border-(--border) bg-(--bg-primary) p-4">
             <p className="text-xs uppercase tracking-[0.14em] text-(--text-muted)">
-              Cache
+              Seguranca + cache
             </p>
             <p className="mt-2 text-sm">
-              Pronto para invalidacao server-side nas proximas fases.
+              Origin/Referer + CSRF + rate-limit. Cache tag ativa:{" "}
+              {PUBLIC_CONTENT_CACHE_TAG}.
             </p>
           </article>
 

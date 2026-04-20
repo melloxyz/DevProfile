@@ -1,19 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { DEFAULT_PROFILE } from "@/config/defaults";
-import { useTheme } from "@/hooks/useTheme";
 
 export function FooterSection() {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = (resolvedTheme ?? "dark") !== "light";
   const currentYear = useMemo(() => new Date().getFullYear(), []);
 
   return (
@@ -45,16 +36,6 @@ export function FooterSection() {
           >
             Repositorio
           </a>
-
-          <button
-            type="button"
-            onClick={() => setTheme(isDark ? "light" : "dark")}
-            disabled={!mounted}
-            className="rounded-lg border border-(--border) px-3 py-2 text-xs font-medium transition-colors hover:border-(--border-bright) disabled:cursor-not-allowed disabled:opacity-60"
-            aria-label="Alternar tema"
-          >
-            {mounted ? (isDark ? "Tema: Dark" : "Tema: Light") : "Tema"}
-          </button>
         </div>
       </div>
     </footer>

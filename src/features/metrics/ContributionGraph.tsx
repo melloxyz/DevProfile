@@ -78,8 +78,8 @@ export function ContributionGraph({
           <span />
         </div>
 
-        <div className="min-w-0 flex-1 overflow-x-auto pb-1">
-          <div className="grid min-w-[620px] grid-cols-[repeat(52,minmax(0,1fr))] gap-1 pb-2 text-[10px] text-(--text-muted)">
+        <div className="min-w-0 flex-1">
+          <div className="grid grid-cols-[repeat(52,minmax(0,1fr))] gap-[2px] pb-2 text-[9px] text-(--text-muted)">
             {Array.from({ length: 52 }).map((_, index) => (
               <span key={`month-marker-${index}`}>
                 {monthMarkers.get(index) ?? ""}
@@ -87,7 +87,7 @@ export function ContributionGraph({
             ))}
           </div>
 
-          <div className="grid min-w-[620px] grid-flow-col grid-rows-7 gap-1">
+          <div className="grid grid-flow-col grid-rows-7 gap-[2px]">
             {cells.map((day, index) => {
               const dateLabel = new Date(
                 `${day.date}T00:00:00Z`,
@@ -98,7 +98,7 @@ export function ContributionGraph({
               return (
                 <div
                   key={`${day.date}-${index}`}
-                  className="h-[8px] w-[8px] rounded-[2px] border border-black/15"
+                  className="aspect-square min-h-[5px] rounded-[2px] border border-black/15"
                   style={{
                     backgroundColor: getCellColor(day.contributionCount),
                   }}

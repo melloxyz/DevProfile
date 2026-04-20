@@ -26,16 +26,13 @@ function HeaderHeroSkeleton() {
   return (
     <section className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-4 sm:p-6">
       <div className="h-32 animate-pulse rounded-xl bg-[color:var(--bg-elevated)] sm:h-40" />
-      <div className="-mt-8 flex items-end gap-4 sm:-mt-10">
-        <div className="h-16 w-16 animate-pulse rounded-2xl border-2 border-[color:var(--bg-surface)] bg-[color:var(--bg-elevated)] sm:h-20 sm:w-20" />
-        <div className="flex flex-1 flex-col gap-2 pb-1">
-          <div className="h-4 w-36 animate-pulse rounded bg-[color:var(--bg-elevated)]" />
+      <div className="mt-4 flex items-start gap-4">
+        <div className="h-20 w-20 animate-pulse rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-elevated)] sm:h-24 sm:w-24" />
+        <div className="flex flex-1 flex-col gap-2">
+          <div className="h-5 w-40 animate-pulse rounded bg-[color:var(--bg-elevated)]" />
           <div className="h-3 w-24 animate-pulse rounded bg-[color:var(--bg-elevated)]" />
+          <div className="h-4 w-full animate-pulse rounded bg-[color:var(--bg-elevated)]" />
         </div>
-      </div>
-      <div className="mt-4 flex flex-col gap-2">
-        <div className="h-4 w-full animate-pulse rounded bg-[color:var(--bg-elevated)]" />
-        <div className="h-4 w-5/6 animate-pulse rounded bg-[color:var(--bg-elevated)]" />
       </div>
     </section>
   );
@@ -75,40 +72,44 @@ export function HeaderHero({ isLoading, profile }: HeaderHeroProps) {
         )}
       </div>
 
-      <div className="-mt-9 flex flex-col gap-3 px-1 sm:-mt-11 sm:flex-row sm:items-end sm:gap-4 sm:px-2">
-        <div className="relative h-18 w-18 overflow-hidden rounded-2xl border-2 border-[color:var(--bg-surface)] bg-[color:var(--bg-elevated)] sm:h-22 sm:w-22">
+      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start">
+        <div className="relative h-22 w-22 shrink-0 overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-elevated)] sm:h-26 sm:w-26">
           <Image
             src={avatarUrl}
             alt={`Avatar de ${resolvedProfile.displayName}`}
             fill
             className="object-cover"
-            sizes="88px"
+            sizes="104px"
             priority
           />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5 pb-1">
-          <h1 className="text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">
-            {resolvedProfile.displayName}
-          </h1>
-          <p className="font-[family-name:var(--font-geist-mono)] text-sm text-[color:var(--text-secondary)]">
-            @{resolvedProfile.username}
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div className="min-w-0">
+              <h1 className="truncate text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">
+                {resolvedProfile.displayName}
+              </h1>
+              <p className="font-[family-name:var(--font-geist-mono)] text-sm text-[color:var(--text-secondary)]">
+                @{resolvedProfile.username}
+              </p>
+            </div>
+
+            <div
+              className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${STATUS_BADGE_STYLE[resolvedProfile.statusColor]}`}
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${STATUS_DOT_STYLE[resolvedProfile.statusColor]}`}
+              />
+              {resolvedProfile.statusText}
+            </div>
+          </div>
+
+          <p className="mt-3 text-sm leading-relaxed text-[color:var(--text-secondary)] sm:text-base">
+            {resolvedProfile.bio}
           </p>
         </div>
-
-        <div
-          className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${STATUS_BADGE_STYLE[resolvedProfile.statusColor]}`}
-        >
-          <span
-            className={`h-2 w-2 rounded-full ${STATUS_DOT_STYLE[resolvedProfile.statusColor]}`}
-          />
-          {resolvedProfile.statusText}
-        </div>
       </div>
-
-      <p className="mt-4 text-sm leading-relaxed text-[color:var(--text-secondary)] sm:text-base">
-        {resolvedProfile.bio}
-      </p>
     </section>
   );
 }

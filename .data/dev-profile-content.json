@@ -2,12 +2,18 @@
   "profile": {
     "displayName": "João Mello",
     "username": "melloxyz",
-    "bio": "dev junior",
+    "bio": "Desenvolvedor Junior",
     "statusText": "Disponivel para oportunidades",
     "statusColor": "blue",
     "bannerUrl": null
   },
   "quickLinks": [
+    {
+      "id": "6335cc28-16df-4731-9be3-c3d029677e88",
+      "label": "Rocketseat",
+      "url": "https://app.rocketseat.com.br/me/mxrvit",
+      "iconText": "RK"
+    },
     {
       "id": "github",
       "label": "GitHub",
@@ -102,5 +108,5 @@
       "url_validador": "https://app.rocketseat.com.br/certificates/5286db19-c21e-4e40-9b8d-edc2aa89a2dd"
     }
   ],
-  "updatedAt": "2026-04-20T16:04:39.455Z"
+  "updatedAt": "2026-04-20T17:18:44.328Z"
 }

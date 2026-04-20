@@ -1,0 +1,34 @@
+{
+  "profile": {
+    "displayName": "Mello",
+    "username": "melloxyz",
+    "bio": "Desenvolvedor apaixonado por criar produtos que as pessoas amam.",
+    "statusText": "Disponivel para oportunidades",
+    "statusColor": "green",
+    "bannerUrl": null
+  },
+  "quickLinks": [
+    {
+      "id": "github",
+      "label": "GitHub",
+      "url": "https://github.com/melloxyz",
+      "iconText": "GH"
+    },
+    {
+      "id": "linkedin",
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/joaomellodev/",
+      "iconText": "IN"
+    },
+    {
+      "id": "twitter",
+      "label": "Twitter/X",
+      "url": "https://x.com/mxrvit",
+      "iconText": "X"
+    }
+  ],
+  "projects": [],
+  "certificates": [],
+  "events": [],
+  "updatedAt": "2026-04-20T15:34:37.422Z"
+}

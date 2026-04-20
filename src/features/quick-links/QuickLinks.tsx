@@ -18,13 +18,14 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { CSSProperties } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { DEFAULT_LINKS } from "@/config/defaults";
 import type { QuickLink } from "@/types/profile";
 
 type QuickLinksProps = {
   isLoading: boolean;
+  links?: QuickLink[];
 };
 
 type SortableItemProps = {
@@ -101,8 +102,19 @@ function QuickLinksSkeleton() {
   );
 }
 
-export function QuickLinks({ isLoading }: QuickLinksProps) {
-  const [links, setLinks] = useState<QuickLink[]>(DEFAULT_LINKS);
+export function QuickLinks({
+  isLoading,
+  links: providedLinks,
+}: QuickLinksProps) {
+  const [links, setLinks] = useState<QuickLink[]>(
+    providedLinks ?? DEFAULT_LINKS,
+  );
+
+  useEffect(() => {
+    if (providedLinks) {
+      setLinks(providedLinks);
+    }
+  }, [providedLinks]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

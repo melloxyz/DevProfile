@@ -1,10 +1,11 @@
 import Image from "next/image";
 
 import { DEFAULT_PROFILE } from "@/config/defaults";
-import type { StatusColor } from "@/types/profile";
+import type { ProfileData, StatusColor } from "@/types/profile";
 
 type HeaderHeroProps = {
   isLoading: boolean;
+  profile?: ProfileData;
 };
 
 const STATUS_BADGE_STYLE: Record<StatusColor, string> = {
@@ -40,25 +41,26 @@ function HeaderHeroSkeleton() {
   );
 }
 
-export function HeaderHero({ isLoading }: HeaderHeroProps) {
+export function HeaderHero({ isLoading, profile }: HeaderHeroProps) {
   if (isLoading) {
     return <HeaderHeroSkeleton />;
   }
 
-  const avatarUrl = `https://github.com/${DEFAULT_PROFILE.username}.png?size=320`;
+  const resolvedProfile = profile ?? DEFAULT_PROFILE;
+  const avatarUrl = `https://github.com/${resolvedProfile.username}.png?size=320`;
 
   return (
     <section className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-surface)] p-4 shadow-[0_12px_40px_rgba(0,0,0,0.28)] sm:p-6">
       <div className="mb-3 flex items-center gap-3 text-[11px] uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
         <span>Dev Profile</span>
         <span className="h-px flex-1 bg-[color:var(--border)]" />
-        <span>{DEFAULT_PROFILE.username}</span>
+        <span>{resolvedProfile.username}</span>
       </div>
 
       <div className="relative h-32 overflow-hidden rounded-2xl border border-[color:var(--border)] sm:h-40">
-        {DEFAULT_PROFILE.bannerUrl ? (
+        {resolvedProfile.bannerUrl ? (
           <Image
-            src={DEFAULT_PROFILE.bannerUrl}
+            src={resolvedProfile.bannerUrl}
             alt="Banner do perfil"
             fill
             className="object-cover"
@@ -77,7 +79,7 @@ export function HeaderHero({ isLoading }: HeaderHeroProps) {
         <div className="relative h-18 w-18 overflow-hidden rounded-2xl border-2 border-[color:var(--bg-surface)] bg-[color:var(--bg-elevated)] sm:h-22 sm:w-22">
           <Image
             src={avatarUrl}
-            alt={`Avatar de ${DEFAULT_PROFILE.displayName}`}
+            alt={`Avatar de ${resolvedProfile.displayName}`}
             fill
             className="object-cover"
             sizes="88px"
@@ -87,25 +89,25 @@ export function HeaderHero({ isLoading }: HeaderHeroProps) {
 
         <div className="flex min-w-0 flex-1 flex-col gap-1.5 pb-1">
           <h1 className="text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">
-            {DEFAULT_PROFILE.displayName}
+            {resolvedProfile.displayName}
           </h1>
           <p className="font-[family-name:var(--font-geist-mono)] text-sm text-[color:var(--text-secondary)]">
-            @{DEFAULT_PROFILE.username}
+            @{resolvedProfile.username}
           </p>
         </div>
 
         <div
-          className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${STATUS_BADGE_STYLE[DEFAULT_PROFILE.statusColor]}`}
+          className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${STATUS_BADGE_STYLE[resolvedProfile.statusColor]}`}
         >
           <span
-            className={`h-2 w-2 rounded-full ${STATUS_DOT_STYLE[DEFAULT_PROFILE.statusColor]}`}
+            className={`h-2 w-2 rounded-full ${STATUS_DOT_STYLE[resolvedProfile.statusColor]}`}
           />
-          {DEFAULT_PROFILE.statusText}
+          {resolvedProfile.statusText}
         </div>
       </div>
 
       <p className="mt-4 text-sm leading-relaxed text-[color:var(--text-secondary)] sm:text-base">
-        {DEFAULT_PROFILE.bio}
+        {resolvedProfile.bio}
       </p>
     </section>
   );

@@ -25,6 +25,7 @@ export interface Project {
   stack: string[];
   repoUrl: string;
   demoUrl?: string;
+  thumbnailUrl?: string;
 }
 
 export interface Certificate {
@@ -43,4 +44,13 @@ export interface EventItem {
   location: string;
   url?: string;
   description: string;
+}
+
+export interface PublicContentSnapshot {
+  profile: ProfileData;
+  quickLinks: QuickLink[];
+  projects: Project[];
+  certificates: Certificate[];
+  events: EventItem[];
+  updatedAt: string;
 }

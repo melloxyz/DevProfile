@@ -7,10 +7,13 @@ import {
   DEFAULT_EVENTS,
   DEFAULT_PROJECTS,
 } from "@/config/defaults";
-import type { TabId } from "@/types/profile";
+import type { Certificate, EventItem, Project, TabId } from "@/types/profile";
 
 type ProfileTabsProps = {
   isLoading: boolean;
+  projects?: Project[];
+  certificates?: Certificate[];
+  events?: EventItem[];
 };
 
 const TAB_ITEMS: Array<{ id: TabId; label: string }> = [
@@ -60,8 +63,17 @@ function TabsSkeleton() {
   );
 }
 
-export function ProfileTabs({ isLoading }: ProfileTabsProps) {
+export function ProfileTabs({
+  isLoading,
+  projects,
+  certificates,
+  events,
+}: ProfileTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>("projects");
+
+  const projectItems = projects ?? DEFAULT_PROJECTS;
+  const certificateItems = certificates ?? DEFAULT_CERTIFICATES;
+  const eventItems = events ?? DEFAULT_EVENTS;
 
   if (isLoading) {
     return <TabsSkeleton />;
@@ -101,9 +113,9 @@ export function ProfileTabs({ isLoading }: ProfileTabsProps) {
       <div key={activeTab} className="mt-4 animate-[panelIn_220ms_ease-out]">
         {activeTab === "projects" && (
           <>
-            {DEFAULT_PROJECTS.length > 0 ? (
+            {projectItems.length > 0 ? (
               <div className="grid gap-3 sm:grid-cols-2">
-                {DEFAULT_PROJECTS.map((project) => (
+                {projectItems.map((project) => (
                   <article
                     key={project.id}
                     className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-elevated)] p-4 transition-transform hover:-translate-y-0.5"
@@ -136,9 +148,9 @@ export function ProfileTabs({ isLoading }: ProfileTabsProps) {
 
         {activeTab === "certificates" && (
           <>
-            {DEFAULT_CERTIFICATES.length > 0 ? (
+            {certificateItems.length > 0 ? (
               <div className="grid gap-3 sm:grid-cols-2">
-                {DEFAULT_CERTIFICATES.map((certificate) => (
+                {certificateItems.map((certificate) => (
                   <article
                     key={certificate.id}
                     className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-elevated)] p-4"
@@ -163,9 +175,9 @@ export function ProfileTabs({ isLoading }: ProfileTabsProps) {
 
         {activeTab === "events" && (
           <>
-            {DEFAULT_EVENTS.length > 0 ? (
+            {eventItems.length > 0 ? (
               <div className="grid gap-3 sm:grid-cols-2">
-                {DEFAULT_EVENTS.map((eventItem) => (
+                {eventItems.map((eventItem) => (
                   <article
                     key={eventItem.id}
                     className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-elevated)] p-4"

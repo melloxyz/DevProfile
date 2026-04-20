@@ -1,10 +1,10 @@
 {
   "profile": {
-    "displayName": "Mello",
+    "displayName": "João Mello",
     "username": "melloxyz",
-    "bio": "Desenvolvedor apaixonado por criar produtos que as pessoas amam.",
+    "bio": "dev junior",
     "statusText": "Disponivel para oportunidades",
-    "statusColor": "green",
+    "statusColor": "blue",
     "bannerUrl": null
   },
   "quickLinks": [
@@ -30,5 +30,5 @@
   "projects": [],
   "certificates": [],
   "events": [],
-  "updatedAt": "2026-04-20T15:34:37.422Z"
+  "updatedAt": "2026-04-20T16:04:39.455Z"
 }

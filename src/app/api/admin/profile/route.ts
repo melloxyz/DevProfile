@@ -1,4 +1,4 @@
-import * as argon2 from "argon2";
+import bcrypt from "bcryptjs";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -13,6 +13,8 @@ import type { StatusColor } from "@/types/profile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const BCRYPT_SALT_ROUNDS = 12;
 
 type ProfilePatchBody = {
   displayName?: string;
@@ -131,7 +133,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
   }));
 
   if (adminPassword) {
-    const hash = await argon2.hash(adminPassword, { type: argon2.argon2id });
+    const hash = await bcrypt.hash(adminPassword, BCRYPT_SALT_ROUNDS);
     await setCustomAdminPasswordHash(hash);
   }
 

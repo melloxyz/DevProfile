@@ -1,38 +1,44 @@
 import "server-only";
 
-import * as argon2 from "argon2";
+import bcrypt from "bcryptjs";
 
-function normalizeArgon2Hash(hashValue: string): string {
+const BCRYPT_PREFIXES = ["$2a$", "$2b$", "$2y$"] as const;
+
+export function normalizeBcryptHash(hashValue: string): string {
   const trimmed = hashValue.trim();
   const unescaped = trimmed.replace(/\\\$/g, "$");
 
-  if (unescaped.startsWith("$argon2id$")) {
+  if (BCRYPT_PREFIXES.some((prefix) => unescaped.startsWith(prefix))) {
     return unescaped;
   }
 
-  if (unescaped.startsWith("argon2id$")) {
+  if (
+    unescaped.startsWith("2a$") ||
+    unescaped.startsWith("2b$") ||
+    unescaped.startsWith("2y$")
+  ) {
     return `$${unescaped}`;
   }
 
-  if (unescaped.startsWith("v=19$m=")) {
-    return `$argon2id$${unescaped}`;
-  }
-
   return unescaped;
+}
+
+export function isSupportedBcryptHash(hashValue: string): boolean {
+  return BCRYPT_PREFIXES.some((prefix) => hashValue.startsWith(prefix));
 }
 
 export async function verifyAdminPassword(params: {
   password: string;
   expectedHash: string;
 }): Promise<boolean> {
-  const normalizedHash = normalizeArgon2Hash(params.expectedHash);
+  const normalizedHash = normalizeBcryptHash(params.expectedHash);
 
-  if (!normalizedHash.startsWith("$argon2id$")) {
+  if (!isSupportedBcryptHash(normalizedHash)) {
     return false;
   }
 
   try {
-    return await argon2.verify(normalizedHash, params.password);
+    return await bcrypt.compare(params.password, normalizedHash);
   } catch {
     return false;
   }

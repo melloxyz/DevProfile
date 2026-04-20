@@ -41,6 +41,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Github Codespaces
+# github codespaces
 .devcontainer
 .github/
+.copilotignore
+.vscode/

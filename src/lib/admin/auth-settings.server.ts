@@ -3,6 +3,11 @@ import "server-only";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
+import {
+  isSupportedBcryptHash,
+  normalizeBcryptHash,
+} from "@/lib/admin/password.server";
+
 const DATA_DIRECTORY = path.join(process.cwd(), ".data");
 const AUTH_SETTINGS_FILE_PATH = path.join(
   DATA_DIRECTORY,
@@ -39,12 +44,17 @@ export async function getEffectiveAdminPasswordHash(
   envPasswordHash: string,
 ): Promise<string> {
   const settings = await readAuthSettings();
+  const normalizedEnvHash = normalizeBcryptHash(envPasswordHash);
 
   if (settings.passwordHash && settings.passwordHash.length > 0) {
-    return settings.passwordHash;
+    const normalizedCustomHash = normalizeBcryptHash(settings.passwordHash);
+
+    if (isSupportedBcryptHash(normalizedCustomHash)) {
+      return normalizedCustomHash;
+    }
   }
 
-  return envPasswordHash;
+  return normalizedEnvHash;
 }
 
 export async function setCustomAdminPasswordHash(hash: string): Promise<void> {

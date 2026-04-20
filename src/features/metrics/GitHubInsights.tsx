@@ -88,16 +88,6 @@ export function GitHubInsights() {
           <h2 className="text-lg font-semibold tracking-[-0.02em]">
             Metricas GitHub
           </h2>
-          <span
-            className={[
-              "rounded-full border px-2.5 py-1 text-xs",
-              metrics.isLimited
-                ? "border-amber-300/35 bg-amber-500/15 text-amber-100"
-                : "border-emerald-300/35 bg-emerald-500/15 text-emerald-100",
-            ].join(" ")}
-          >
-            {metrics.isLimited ? "Modo limitado" : "Modo token"}
-          </span>
           <span className="text-xs text-(--text-secondary)">
             Atualizado em{" "}
             {new Date(metrics.lastUpdated).toLocaleString("pt-BR", {
@@ -108,12 +98,12 @@ export function GitHubInsights() {
 
         <StatCards metrics={metrics} />
 
-        <div className="mt-4 grid gap-4 xl:grid-cols-[2fr_1fr]">
+        <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <ContributionGraph
             calendar={metrics.contributionCalendar}
             hasGraphData={hasGraphData}
           />
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <LanguageBar languages={metrics.languages} />
             <StreakCounter
               streak={metrics.streak}

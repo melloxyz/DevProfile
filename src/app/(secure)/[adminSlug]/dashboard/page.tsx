@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { AdminContentManager } from "@/features/admin/AdminContentManager";
+import { AdminGitHubModeCard } from "@/features/admin/AdminGitHubModeCard";
 import { AdminLogoutButton } from "@/features/admin/AdminLogoutButton";
 import { ADMIN_SESSION_COOKIE_NAME } from "@/lib/admin/constants";
 import { verifyAdminSessionToken } from "@/lib/admin/session";
@@ -103,6 +104,8 @@ export default async function AdminDashboardPage({
               Pronto para invalidacao server-side nas proximas fases.
             </p>
           </article>
+
+          <AdminGitHubModeCard />
         </div>
 
         <div className="mt-6">

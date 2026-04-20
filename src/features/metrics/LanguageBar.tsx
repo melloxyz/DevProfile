@@ -6,7 +6,7 @@ type LanguageBarProps = {
 
 export function LanguageBar({ languages }: LanguageBarProps) {
   return (
-    <article className="rounded-xl border border-(--border) bg-(--bg-elevated) p-4">
+    <article className="min-w-0 rounded-xl border border-(--border) bg-(--bg-elevated) p-4">
       <div className="mb-3 flex items-center gap-3">
         <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-(--text-muted)">
           Language Bar
@@ -23,7 +23,12 @@ export function LanguageBar({ languages }: LanguageBarProps) {
           {languages.map((language) => (
             <div key={language.name}>
               <div className="mb-1 flex items-center justify-between text-xs">
-                <span className="font-medium">{language.name}</span>
+                <span
+                  className="max-w-[70%] truncate font-medium"
+                  title={language.name}
+                >
+                  {language.name}
+                </span>
                 <span className="text-(--text-secondary)">
                   {language.percentage.toFixed(1)}%
                 </span>

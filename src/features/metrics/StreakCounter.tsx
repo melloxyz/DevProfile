@@ -28,7 +28,7 @@ export function StreakCounter({ streak, calendar }: StreakCounterProps) {
     .slice(-21);
 
   return (
-    <article className="rounded-xl border border-(--border) bg-(--bg-elevated) p-4">
+    <article className="min-w-0 rounded-xl border border-(--border) bg-(--bg-elevated) p-4">
       <div className="mb-3 flex items-center gap-3">
         <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-(--text-muted)">
           Streak Counter
@@ -41,7 +41,7 @@ export function StreakCounter({ streak, calendar }: StreakCounterProps) {
           <p className="text-xs uppercase tracking-[0.12em] text-(--text-muted)">
             Atual
           </p>
-          <p className="mt-1 text-2xl font-semibold">
+          <p className="mt-1 text-xl font-semibold sm:text-2xl">
             {streak.current.toLocaleString("pt-BR")}
           </p>
         </div>
@@ -50,7 +50,7 @@ export function StreakCounter({ streak, calendar }: StreakCounterProps) {
           <p className="text-xs uppercase tracking-[0.12em] text-(--text-muted)">
             Maximo
           </p>
-          <p className="mt-1 text-2xl font-semibold">
+          <p className="mt-1 text-xl font-semibold sm:text-2xl">
             {streak.max.toLocaleString("pt-BR")}
           </p>
         </div>

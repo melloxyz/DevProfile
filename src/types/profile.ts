@@ -29,21 +29,19 @@ export interface Project {
 }
 
 export interface Certificate {
-  id: string;
-  title: string;
-  issuer: string;
-  date: string;
-  verificationUrl: string;
-  imageUrl?: string;
+  titulo: string;
+  instituicao: string;
+  emitido_em: string;
+  codigo_credencial: string;
+  url_validador: string;
 }
 
 export interface EventItem {
-  id: string;
-  name: string;
-  date: string;
-  location: string;
-  url?: string;
-  description: string;
+  titulo: string;
+  instituicao: string;
+  emitido_em: string;
+  codigo_credencial: string;
+  url_validador: string;
 }
 
 export interface PublicContentSnapshot {

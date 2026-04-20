@@ -69,7 +69,7 @@ export async function fetchUserRepos(
   username: string,
 ): Promise<{ repos: GitHubRepo[]; mode: GitHubMode }> {
   const { data, mode } = await requestGitHub<GitHubRepo[]>(
-    `users/${encodeURIComponent(username)}/repos?type=owner&sort=updated&per_page=100`,
+    `users/${encodeURIComponent(username)}/repos?type=owner&sort=created&direction=desc&per_page=100`,
   );
 
   return {

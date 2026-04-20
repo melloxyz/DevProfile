@@ -184,6 +184,44 @@ export function parseProjectsInput(input: unknown): Project[] | null {
   return normalized;
 }
 
+function parseCredentialEntry(input: Record<string, unknown>): {
+  titulo: string;
+  instituicao: string;
+  emitido_em: string;
+  codigo_credencial: string;
+  url_validador: string;
+} | null {
+  const titulo = readRequiredString(input.titulo ?? input.title ?? input.name);
+  const instituicao = readRequiredString(
+    input.instituicao ?? input.issuer ?? input.location,
+  );
+  const emitidoEm = readRequiredString(input.emitido_em ?? input.date);
+  const codigoCredencial = readRequiredString(
+    input.codigo_credencial ?? input.id,
+  );
+  const urlValidador = readRequiredString(
+    input.url_validador ?? input.verificationUrl ?? input.url,
+  );
+
+  if (
+    !titulo ||
+    !instituicao ||
+    !emitidoEm ||
+    !codigoCredencial ||
+    !urlValidador
+  ) {
+    return null;
+  }
+
+  return {
+    titulo,
+    instituicao,
+    emitido_em: emitidoEm,
+    codigo_credencial: codigoCredencial,
+    url_validador: urlValidador,
+  };
+}
+
 export function parseCertificatesInput(input: unknown): Certificate[] | null {
   if (!Array.isArray(input)) {
     return null;
@@ -196,25 +234,13 @@ export function parseCertificatesInput(input: unknown): Certificate[] | null {
       return null;
     }
 
-    const id = readRequiredString(item.id) ?? crypto.randomUUID();
-    const title = readRequiredString(item.title);
-    const issuer = readRequiredString(item.issuer);
-    const date = readRequiredString(item.date);
-    const verificationUrl = readRequiredString(item.verificationUrl);
-    const imageUrl = readOptionalString(item.imageUrl);
+    const parsed = parseCredentialEntry(item);
 
-    if (!title || !issuer || !date || !verificationUrl) {
+    if (!parsed) {
       return null;
     }
 
-    normalized.push({
-      id,
-      title,
-      issuer,
-      date,
-      verificationUrl,
-      imageUrl,
-    });
+    normalized.push(parsed);
   }
 
   return normalized;
@@ -232,25 +258,13 @@ export function parseEventsInput(input: unknown): EventItem[] | null {
       return null;
     }
 
-    const id = readRequiredString(item.id) ?? crypto.randomUUID();
-    const name = readRequiredString(item.name);
-    const date = readRequiredString(item.date);
-    const location = readRequiredString(item.location);
-    const description = readRequiredString(item.description);
-    const url = readOptionalString(item.url);
+    const parsed = parseCredentialEntry(item);
 
-    if (!name || !date || !location || !description) {
+    if (!parsed) {
       return null;
     }
 
-    normalized.push({
-      id,
-      name,
-      date,
-      location,
-      url,
-      description,
-    });
+    normalized.push(parsed);
   }
 
   return normalized;
@@ -360,7 +374,7 @@ export async function readPublicContentSnapshot(): Promise<PublicContentSnapshot
 
 const readPublicContentSnapshotCachedFn = unstable_cache(
   async () => readStoreFromDisk(),
-  ["dev-profile-public-content"],
+  ["dev-profile-public-content-v2"],
   {
     tags: [PUBLIC_CONTENT_CACHE_TAG],
   },

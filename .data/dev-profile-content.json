@@ -28,7 +28,79 @@
     }
   ],
   "projects": [],
-  "certificates": [],
-  "events": [],
+  "certificates": [
+    {
+      "titulo": "Dev com IA: Claude Code, Codex e Cursor",
+      "instituicao": "Rocketseat",
+      "emitido_em": "04/2026",
+      "codigo_credencial": "c617d4e8-8921-454d-859d-0a5d45cc6b44",
+      "url_validador": "https://app.rocketseat.com.br/certificates/c617d4e8-8921-454d-859d-0a5d45cc6b44"
+    },
+    {
+      "titulo": "Fundamentos de TI: Hardware e Software",
+      "instituicao": "Fundação Bradesco",
+      "emitido_em": "04/2026",
+      "codigo_credencial": "DEB6ED1A-6903-4A4A-A33F-1F3294E25C7F",
+      "url_validador": "https://www.ev.org.br/validar-certificado"
+    },
+    {
+      "titulo": "Node.js",
+      "instituicao": "Rocketseat",
+      "emitido_em": "04/2026",
+      "codigo_credencial": "ee26b5f2-fedb-4664-b27a-7a98b08a0477",
+      "url_validador": "https://app.rocketseat.com.br/certificates/ee26b5f2-fedb-4664-b27a-7a98b08a0477"
+    },
+    {
+      "titulo": "DDD no Node.js",
+      "instituicao": "Rocketseat",
+      "emitido_em": "04/2026",
+      "codigo_credencial": "d218e601-1c0f-4b3f-b89f-d4fe6f266872",
+      "url_validador": "https://app.rocketseat.com.br/certificates/d218e601-1c0f-4b3f-b89f-d4fe6f266872"
+    },
+    {
+      "titulo": "NestJS",
+      "instituicao": "Rocketseat",
+      "emitido_em": "04/2026",
+      "codigo_credencial": "ae6e2f79-9cd5-4389-a278-9d86b719cea3",
+      "url_validador": "https://app.rocketseat.com.br/certificates/ae6e2f79-9cd5-4389-a278-9d86b719cea3"
+    },
+    {
+      "titulo": "Clean Code",
+      "instituicao": "Rocketseat",
+      "emitido_em": "10/2025",
+      "codigo_credencial": "62a1abcc-f6d8-48de-b164-73460511556a",
+      "url_validador": "https://app.rocketseat.com.br/certificates/62a1abcc-f6d8-48de-b164-73460511556a"
+    },
+    {
+      "titulo": "Comunicação Assertiva",
+      "instituicao": "Rocketseat",
+      "emitido_em": "09/2025",
+      "codigo_credencial": "ada959c5-9abb-41fd-9ac1-f4adb4b65d17",
+      "url_validador": "https://app.rocketseat.com.br/certificates/ada959c5-9abb-41fd-9ac1-f4adb4b65d17"
+    },
+    {
+      "titulo": "Metodologias Ágeis",
+      "instituicao": "Rocketseat",
+      "emitido_em": "09/2025",
+      "codigo_credencial": "e301b019-2ab3-4fd3-b7d0-6d257f55931f",
+      "url_validador": "https://app.rocketseat.com.br/certificates/e301b019-2ab3-4fd3-b7d0-6d257f55931f"
+    },
+    {
+      "titulo": "Fundamentos do Node.js",
+      "instituicao": "Rocketseat",
+      "emitido_em": "08/2025",
+      "codigo_credencial": "d4718d59-2e75-48dd-baeb-db5af608e483",
+      "url_validador": "https://app.rocketseat.com.br/certificates/d4718d59-2e75-48dd-baeb-db5af608e483"
+    }
+  ],
+  "events": [
+    {
+      "titulo": "Carreira IA: do zero ao primeiro agente automático com n8n - Inteligência Artificial",
+      "instituicao": "Rocketseat",
+      "emitido_em": "01/2026",
+      "codigo_credencial": "5286db19-c21e-4e40-9b8d-edc2aa89a2dd",
+      "url_validador": "https://app.rocketseat.com.br/certificates/5286db19-c21e-4e40-9b8d-edc2aa89a2dd"
+    }
+  ],
   "updatedAt": "2026-04-20T16:04:39.455Z"
 }

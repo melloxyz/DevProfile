@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   DEFAULT_CERTIFICATES,
   DEFAULT_EVENTS,
   DEFAULT_PROJECTS,
 } from "@/config/defaults";
+import { useGitHubData } from "@/hooks/useGitHubData";
 import type { Certificate, EventItem, Project, TabId } from "@/types/profile";
 
 type ProfileTabsProps = {
@@ -70,8 +71,30 @@ export function ProfileTabs({
   events,
 }: ProfileTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>("projects");
+  const githubQuery = useGitHubData({ enabled: !isLoading });
 
-  const projectItems = projects ?? DEFAULT_PROJECTS;
+  const githubProjects = useMemo<Project[]>(() => {
+    const repos = githubQuery.data?.metrics.repos ?? [];
+
+    return repos
+      .filter((repo) => !repo.private)
+      .sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      )
+      .map((repo) => ({
+        id: String(repo.id),
+        name: repo.name,
+        description:
+          repo.description?.trim() || "Repositorio publico sem descricao.",
+        stack: repo.language ? [repo.language] : [],
+        repoUrl: repo.html_url,
+        demoUrl: repo.homepage || undefined,
+      }));
+  }, [githubQuery.data?.metrics.repos]);
+
+  const projectItems =
+    githubProjects.length > 0 ? githubProjects : (projects ?? DEFAULT_PROJECTS);
   const certificateItems = certificates ?? DEFAULT_CERTIFICATES;
   const eventItems = events ?? DEFAULT_EVENTS;
 
@@ -125,22 +148,49 @@ export function ProfileTabs({
                       {project.description}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {project.stack.map((tech) => (
-                        <span
-                          key={`${project.id}-${tech}`}
-                          className="rounded-md border border-[color:var(--border)] px-2 py-1 text-xs text-[color:var(--text-secondary)]"
-                        >
-                          {tech}
+                      {project.stack.length > 0 ? (
+                        project.stack.map((tech) => (
+                          <span
+                            key={`${project.id}-${tech}`}
+                            className="rounded-md border border-[color:var(--border)] px-2 py-1 text-xs text-[color:var(--text-secondary)]"
+                          >
+                            {tech}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="rounded-md border border-[color:var(--border)] px-2 py-1 text-xs text-[color:var(--text-secondary)]">
+                          Sem linguagem principal
                         </span>
-                      ))}
+                      )}
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap gap-3 text-xs">
+                      <a
+                        href={project.repoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-(--accent) hover:underline"
+                      >
+                        Repositorio
+                      </a>
+                      {project.demoUrl ? (
+                        <a
+                          href={project.demoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-(--text-secondary) hover:underline"
+                        >
+                          Demo
+                        </a>
+                      ) : null}
                     </div>
                   </article>
                 ))}
               </div>
             ) : (
               <EmptyPanel
-                title="Nenhum projeto configurado ainda"
-                description="Os cards de projeto serao preenchidos pelo painel admin nas proximas fases."
+                title="Nenhum projeto publico encontrado"
+                description="A aba de projetos agora carrega repositorios publicos diretamente da API do GitHub."
               />
             )}
           </>
@@ -152,15 +202,26 @@ export function ProfileTabs({
               <div className="grid gap-3 sm:grid-cols-2">
                 {certificateItems.map((certificate) => (
                   <article
-                    key={certificate.id}
+                    key={`${certificate.codigo_credencial}-${certificate.titulo}`}
                     className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-elevated)] p-4"
                   >
                     <h3 className="text-sm font-semibold">
-                      {certificate.title}
+                      {certificate.titulo}
                     </h3>
                     <p className="mt-2 text-sm text-[color:var(--text-secondary)]">
-                      {certificate.issuer}
+                      {certificate.instituicao} • {certificate.emitido_em}
                     </p>
+                    <p className="mt-2 break-all text-xs text-[color:var(--text-secondary)]">
+                      Credencial: {certificate.codigo_credencial}
+                    </p>
+                    <a
+                      href={certificate.url_validador}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex text-xs text-(--accent) hover:underline"
+                    >
+                      Validar certificado
+                    </a>
                   </article>
                 ))}
               </div>
@@ -179,13 +240,26 @@ export function ProfileTabs({
               <div className="grid gap-3 sm:grid-cols-2">
                 {eventItems.map((eventItem) => (
                   <article
-                    key={eventItem.id}
+                    key={`${eventItem.codigo_credencial}-${eventItem.titulo}`}
                     className="rounded-xl border border-[color:var(--border)] bg-[color:var(--bg-elevated)] p-4"
                   >
-                    <h3 className="text-sm font-semibold">{eventItem.name}</h3>
+                    <h3 className="text-sm font-semibold">
+                      {eventItem.titulo}
+                    </h3>
                     <p className="mt-2 text-sm text-[color:var(--text-secondary)]">
-                      {eventItem.description}
+                      {eventItem.instituicao} • {eventItem.emitido_em}
                     </p>
+                    <p className="mt-2 break-all text-xs text-[color:var(--text-secondary)]">
+                      Credencial: {eventItem.codigo_credencial}
+                    </p>
+                    <a
+                      href={eventItem.url_validador}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex text-xs text-(--accent) hover:underline"
+                    >
+                      Validar evento
+                    </a>
                   </article>
                 ))}
               </div>

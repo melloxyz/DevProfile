@@ -11,13 +11,16 @@ export interface GitHubUserProfile {
 export interface GitHubRepo {
   id: number;
   name: string;
+  description: string | null;
   html_url: string;
+  homepage: string | null;
   stargazers_count: number;
   forks_count: number;
   language: string | null;
   private: boolean;
   fork: boolean;
   archived: boolean;
+  created_at: string;
   pushed_at: string;
 }
 

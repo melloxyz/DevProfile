@@ -555,6 +555,11 @@ export function AdminContentManager({
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-(--text-muted)">
           Projetos (JSON)
         </h2>
+        <p className="mt-1 text-xs text-(--text-secondary)">
+          A vitrine publica de projetos agora prioriza repositorios publicos da
+          API do GitHub (mais recente para mais antigo). Este JSON fica como
+          fallback manual.
+        </p>
         <textarea
           value={projectsJson}
           onChange={(event) => setProjectsJson(event.target.value)}
@@ -588,6 +593,10 @@ export function AdminContentManager({
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-(--text-muted)">
           Certificados (JSON)
         </h2>
+        <p className="mt-1 text-xs text-(--text-secondary)">
+          Campos obrigatorios: titulo, instituicao, emitido_em,
+          codigo_credencial, url_validador.
+        </p>
         <textarea
           value={certificatesJson}
           onChange={(event) => setCertificatesJson(event.target.value)}
@@ -621,6 +630,10 @@ export function AdminContentManager({
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-(--text-muted)">
           Eventos (JSON)
         </h2>
+        <p className="mt-1 text-xs text-(--text-secondary)">
+          Campos obrigatorios: titulo, instituicao, emitido_em,
+          codigo_credencial, url_validador.
+        </p>
         <textarea
           value={eventsJson}
           onChange={(event) => setEventsJson(event.target.value)}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { FooterSection } from "@/features/footer/FooterSection";
 import { HeaderHero } from "@/features/header/HeaderHero";
+import { GitHubInsights } from "@/features/metrics/GitHubInsights";
 import { QuickLinks } from "@/features/quick-links/QuickLinks";
 import { ProfileTabs } from "@/features/tabs/ProfileTabs";
 
@@ -28,6 +29,7 @@ export default function Home() {
         <HeaderHero isLoading={isLoading} />
         <QuickLinks isLoading={isLoading} />
         <ProfileTabs isLoading={isLoading} />
+        <GitHubInsights />
         <FooterSection />
       </main>
     </div>

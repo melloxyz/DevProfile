@@ -1,0 +1,88 @@
+import type { AchievementDefinition } from "@/types/ui";
+
+export const ACHIEVEMENT_DEFINITIONS: AchievementDefinition[] = [
+  {
+    id: "first-commit",
+    name: "Primeira Linha",
+    description: "Alcancar pelo menos 1 commit no periodo.",
+    metric: "commitsTotal",
+    target: 1,
+  },
+  {
+    id: "century",
+    name: "Centuriao",
+    description: "Alcancar 100 commits.",
+    metric: "commitsTotal",
+    target: 100,
+  },
+  {
+    id: "millennium",
+    name: "Milenio",
+    description: "Alcancar 1.000 commits.",
+    metric: "commitsTotal",
+    target: 1000,
+  },
+  {
+    id: "open-sourcerer",
+    name: "Open Sourcerer",
+    description: "Ter ao menos 5 repositorios publicos.",
+    metric: "publicRepos",
+    target: 5,
+  },
+  {
+    id: "prolific",
+    name: "Prolifico",
+    description: "Ter ao menos 20 repositorios publicos.",
+    metric: "publicRepos",
+    target: 20,
+  },
+  {
+    id: "star-collector",
+    name: "Colecionador",
+    description: "Acumular 10 estrelas recebidas.",
+    metric: "starsTotal",
+    target: 10,
+  },
+  {
+    id: "popular",
+    name: "Popular",
+    description: "Acumular 100 estrelas recebidas.",
+    metric: "starsTotal",
+    target: 100,
+  },
+  {
+    id: "collaborator",
+    name: "Colaborador",
+    description: "Ter ao menos 10 PRs merged.",
+    metric: "prsMerged",
+    target: 10,
+  },
+  {
+    id: "streak-week",
+    name: "Semana Perfeita",
+    description: "Manter streak atual de 7 dias.",
+    metric: "streakCurrent",
+    target: 7,
+  },
+  {
+    id: "streak-month",
+    name: "Mes Perfeito",
+    description: "Alcancar streak maximo de 30 dias.",
+    metric: "streakMax",
+    target: 30,
+  },
+  {
+    id: "polyglot",
+    name: "Poliglota",
+    description: "Usar 5 linguagens diferentes.",
+    metric: "languagesDistinct",
+    target: 5,
+  },
+  {
+    id: "networker",
+    name: "Networker",
+    description: "Ter ao menos 50 seguidores.",
+    metric: "followers",
+    target: 50,
+  },
+];

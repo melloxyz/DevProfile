@@ -6,6 +6,9 @@ import {
 } from "@/lib/admin/constants";
 import { verifyAdminSessionToken } from "@/lib/admin/session";
 
+const ADMIN_X_ROBOTS_TAG =
+  "noindex, nofollow, noarchive, nosnippet, noimageindex";
+
 function readTrimmedEnv(name: string): string | null {
   const value = process.env[name]?.trim();
   return value && value.length > 0 ? value : null;
@@ -13,6 +16,11 @@ function readTrimmedEnv(name: string): string | null {
 
 function notFoundResponse(): NextResponse {
   return new NextResponse("Not Found", { status: 404 });
+}
+
+function withAdminNoIndexHeader(response: NextResponse): NextResponse {
+  response.headers.set("X-Robots-Tag", ADMIN_X_ROBOTS_TAG);
+  return response;
 }
 
 async function hasValidSessionCookie(
@@ -32,12 +40,28 @@ async function hasValidSessionCookie(
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const adminSlug = readTrimmedEnv("ADMIN_ROUTE_SLUG");
   const adminSessionSecret = readTrimmedEnv("ADMIN_SESSION_SECRET");
+  const pathname = request.nextUrl.pathname;
 
-  if (!adminSlug || !adminSessionSecret) {
-    return notFoundResponse();
+  if (!adminSlug) {
+    if (pathname.startsWith("/api/admin/")) {
+      return notFoundResponse();
+    }
+
+    return NextResponse.next();
   }
 
-  const pathname = request.nextUrl.pathname;
+  if (!adminSessionSecret) {
+    if (
+      pathname.startsWith("/api/admin/") ||
+      pathname === `/${adminSlug}` ||
+      pathname === `/${adminSlug}/dashboard` ||
+      pathname.startsWith(`/${adminSlug}/dashboard/`)
+    ) {
+      return notFoundResponse();
+    }
+
+    return NextResponse.next();
+  }
 
   if (pathname.startsWith("/api/admin/")) {
     const slugHeader = request.headers.get(ADMIN_ROUTE_SLUG_HEADER)?.trim();
@@ -47,7 +71,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
 
     if (pathname === "/api/admin/auth/login") {
-      return NextResponse.next();
+      return withAdminNoIndexHeader(NextResponse.next());
     }
 
     const validSession = await hasValidSessionCookie(
@@ -59,7 +83,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       return notFoundResponse();
     }
 
-    return NextResponse.next();
+    return withAdminNoIndexHeader(NextResponse.next());
+  }
+
+  if (pathname === `/${adminSlug}`) {
+    return withAdminNoIndexHeader(NextResponse.next());
   }
 
   if (
@@ -75,7 +103,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       return notFoundResponse();
     }
 
-    return NextResponse.next();
+    return withAdminNoIndexHeader(NextResponse.next());
   }
 
   return NextResponse.next();
@@ -84,6 +112,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 export const config = {
   matcher: [
     "/api/admin/:path*",
+    "/:adminSlug",
     "/:adminSlug/dashboard",
     "/:adminSlug/dashboard/:path*",
   ],

@@ -1,8 +1,5 @@
 import "server-only";
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
-
 import { unstable_cache } from "next/cache";
 
 import {
@@ -12,6 +9,12 @@ import {
   DEFAULT_PROFILE,
   DEFAULT_PROJECTS,
 } from "@/config/defaults";
+import {
+  isKvConfigured,
+  PUBLIC_CONTENT_KV_KEY,
+  readKvJson,
+  writeKvJson,
+} from "@/lib/kv-store.server";
 import type {
   Certificate,
   EventItem,
@@ -23,9 +26,6 @@ import type {
 } from "@/types/profile";
 
 export const PUBLIC_CONTENT_CACHE_TAG = "public-content";
-
-const DATA_DIRECTORY = path.join(process.cwd(), ".data");
-const DATA_FILE_PATH = path.join(DATA_DIRECTORY, "dev-profile-content.json");
 
 const STATUS_COLORS: StatusColor[] = ["green", "yellow", "blue", "red"];
 
@@ -309,48 +309,24 @@ function normalizeSnapshot(input: unknown): PublicContentSnapshot | null {
   };
 }
 
-async function ensureDataFileExists(): Promise<void> {
-  await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+async function readStoreFromKv(): Promise<PublicContentSnapshot> {
+  const parsed = await readKvJson<unknown>(PUBLIC_CONTENT_KV_KEY);
+  const normalized = normalizeSnapshot(parsed);
 
-  try {
-    await fs.access(DATA_FILE_PATH);
-  } catch {
-    const seed = createDefaultSnapshot();
-    await fs.writeFile(DATA_FILE_PATH, JSON.stringify(seed, null, 2), "utf-8");
-  }
-}
-
-async function readStoreFromDisk(): Promise<PublicContentSnapshot> {
-  await ensureDataFileExists();
-
-  try {
-    const content = await fs.readFile(DATA_FILE_PATH, "utf-8");
-    const parsed = JSON.parse(content) as unknown;
-    const normalized = normalizeSnapshot(parsed);
-
-    if (!normalized) {
-      const fallback = createDefaultSnapshot();
-      await fs.writeFile(
-        DATA_FILE_PATH,
-        JSON.stringify(fallback, null, 2),
-        "utf-8",
-      );
-      return fallback;
-    }
-
-    return normalized;
-  } catch {
+  if (!normalized && isKvConfigured()) {
     const fallback = createDefaultSnapshot();
-    await fs.writeFile(
-      DATA_FILE_PATH,
-      JSON.stringify(fallback, null, 2),
-      "utf-8",
-    );
+    await writeKvJson(PUBLIC_CONTENT_KV_KEY, fallback);
     return fallback;
   }
+
+  if (!normalized) {
+    return createDefaultSnapshot();
+  }
+
+  return normalized;
 }
 
-async function writeStoreToDisk(
+async function writeStoreToKv(
   snapshot: PublicContentSnapshot,
 ): Promise<PublicContentSnapshot> {
   const withTimestamp: PublicContentSnapshot = {
@@ -358,23 +334,18 @@ async function writeStoreToDisk(
     updatedAt: new Date().toISOString(),
   };
 
-  await ensureDataFileExists();
-  await fs.writeFile(
-    DATA_FILE_PATH,
-    JSON.stringify(withTimestamp, null, 2),
-    "utf-8",
-  );
+  await writeKvJson(PUBLIC_CONTENT_KV_KEY, withTimestamp);
 
   return withTimestamp;
 }
 
 export async function readPublicContentSnapshot(): Promise<PublicContentSnapshot> {
-  return readStoreFromDisk();
+  return readStoreFromKv();
 }
 
 const readPublicContentSnapshotCachedFn = unstable_cache(
-  async () => readStoreFromDisk(),
-  ["dev-profile-public-content-v2"],
+  async () => readStoreFromKv(),
+  ["dev-profile-public-content-v3"],
   {
     tags: [PUBLIC_CONTENT_CACHE_TAG],
   },
@@ -387,7 +358,7 @@ export async function readPublicContentSnapshotCached(): Promise<PublicContentSn
 export async function updatePublicContentSnapshot(
   updater: (current: PublicContentSnapshot) => PublicContentSnapshot,
 ): Promise<PublicContentSnapshot> {
-  const current = await readStoreFromDisk();
+  const current = await readStoreFromKv();
   const candidate = updater(structuredClone(current));
   const normalized = normalizeSnapshot(candidate);
 
@@ -395,7 +366,7 @@ export async function updatePublicContentSnapshot(
     throw new Error("Dados invalidos para persistencia.");
   }
 
-  return writeStoreToDisk(normalized);
+  return writeStoreToKv(normalized);
 }
 
 export async function replacePublicContentSnapshot(
@@ -407,9 +378,9 @@ export async function replacePublicContentSnapshot(
     throw new Error("Payload de backup invalido.");
   }
 
-  return writeStoreToDisk(normalized);
+  return writeStoreToKv(normalized);
 }
 
 export async function resetPublicContentSnapshot(): Promise<PublicContentSnapshot> {
-  return writeStoreToDisk(createDefaultSnapshot());
+  return writeStoreToKv(createDefaultSnapshot());
 }

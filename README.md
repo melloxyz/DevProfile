@@ -8,7 +8,7 @@ O DevProfile é uma plataforma de perfil público para desenvolvedores, integrad
 
 - Integração com a API do GitHub para exibir dados públicos, repositórios e métricas de contribuição.
 - Painel admin protegido por senha com autenticação baseada em bcrypt e sessão persistente.
-- Gerenciamento de conteúdo com suporte a armazenamento em Vercel KV e persistência local em `.data/`.
+- Gerenciamento de conteúdo com persistencia em KV via REST (Vercel Storage/Upstash Redis).
 - Interface com tema claro/escuro usando `next-themes`.
 - Experiências de drag and drop com `dnd-kit` para organizar conteúdos de forma intuitiva.
 - SEO completo com `robots.txt`, `sitemap.xml` e imagem Open Graph.
@@ -28,7 +28,7 @@ O DevProfile é uma plataforma de perfil público para desenvolvedores, integrad
 | @dnd-kit/utilities | 3.x | https://github.com/clauderic/dnd-kit |
 | next-themes | 0.4.x | https://github.com/pacocoursey/next-themes |
 | bcryptjs | 3.x | https://github.com/dcodeIO/bcrypt.js |
-| Vercel KV | Serviço gerenciado | https://vercel.com/storage/kv |
+| Upstash Redis (REST) | Serviço gerenciado | https://upstash.com/docs/redis |
 
 ## 📋 Pré-requisitos
 
@@ -55,8 +55,12 @@ npm run dev
 | `ADMIN_ROUTE_SLUG` | Slug privado usado para acessar o painel administrativo. | Sim |
 | `ADMIN_PASSWORD_HASH` | Hash bcrypt da senha do administrador. | Sim |
 | `ADMIN_SESSION_SECRET` | Segredo usado para assinar e validar a sessão administrativa. | Sim |
-| `KV_REST_API_URL` | URL REST do Vercel KV. | Sim |
-| `KV_REST_API_TOKEN` | Token REST do Vercel KV. | Sim |
+| `KV_REST_API_URL` | URL REST do KV/Redis. | Sim* |
+| `KV_REST_API_TOKEN` | Token REST do KV/Redis. | Sim* |
+| `UPSTASH_REDIS_REST_URL` | Alias aceito para URL REST do Upstash Redis. | Sim* |
+| `UPSTASH_REDIS_REST_TOKEN` | Alias aceito para token REST do Upstash Redis. | Sim* |
+
+\* Defina ao menos um par completo: `KV_REST_API_*` ou `UPSTASH_REDIS_REST_*`.
 
 ## ⚙️ Scripts disponíveis
 
@@ -67,6 +71,7 @@ npm run dev
 | `start` | Executa a build compilada em ambiente de produção. |
 | `lint` | Executa a validação de código com ESLint. |
 | `type-check` | Executa a checagem estática de tipos com TypeScript. |
+| `seed:kv` | Envia o snapshot local de `.data/dev-profile-content.json` para o KV remoto. |
 
 ## 🗂️ Estrutura de pastas
 
@@ -87,7 +92,17 @@ npm run dev
 
 ## 🚢 Deploy
 
-A plataforma recomendada para deploy é a Vercel. Após publicar o projeto, configure todas as variáveis de ambiente no painel do projeto e ajuste `NEXT_PUBLIC_SITE_URL` para `https://devprofile.vercel.app` ou para o seu domínio personalizado.
+A plataforma recomendada para deploy é a Vercel. Para o primeiro deploy:
+
+1. Configure as variaveis de ambiente do projeto (incluindo o par de credenciais KV/Redis e os segredos admin).
+2. Ajuste `NEXT_PUBLIC_SITE_URL` para a URL de producao.
+3. Rode o seed inicial para preencher o KV com o snapshot atual:
+
+```bash
+npm run seed:kv
+```
+
+4. Faça o deploy na Vercel e valide o painel admin (login, edicao e backup).
 
 ## 🤝 Contribuindo
 

@@ -1,18 +1,14 @@
 import "server-only";
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
-
 import {
   isSupportedBcryptHash,
   normalizeBcryptHash,
 } from "@/lib/admin/password.server";
-
-const DATA_DIRECTORY = path.join(process.cwd(), ".data");
-const AUTH_SETTINGS_FILE_PATH = path.join(
-  DATA_DIRECTORY,
-  "admin-auth-settings.json",
-);
+import {
+  ADMIN_AUTH_SETTINGS_KV_KEY,
+  readKvJson,
+  writeKvJson,
+} from "@/lib/kv-store.server";
 
 type AdminAuthSettings = {
   passwordHash?: string;
@@ -20,8 +16,7 @@ type AdminAuthSettings = {
 
 async function readAuthSettings(): Promise<AdminAuthSettings> {
   try {
-    const content = await fs.readFile(AUTH_SETTINGS_FILE_PATH, "utf-8");
-    const parsed = JSON.parse(content) as unknown;
+    const parsed = await readKvJson<unknown>(ADMIN_AUTH_SETTINGS_KV_KEY);
 
     if (typeof parsed === "object" && parsed !== null) {
       const candidate = parsed as Partial<AdminAuthSettings>;
@@ -58,15 +53,9 @@ export async function getEffectiveAdminPasswordHash(
 }
 
 export async function setCustomAdminPasswordHash(hash: string): Promise<void> {
-  await fs.mkdir(DATA_DIRECTORY, { recursive: true });
-
   const payload: AdminAuthSettings = {
     passwordHash: hash.trim(),
   };
 
-  await fs.writeFile(
-    AUTH_SETTINGS_FILE_PATH,
-    JSON.stringify(payload, null, 2),
-    "utf-8",
-  );
+  await writeKvJson(ADMIN_AUTH_SETTINGS_KV_KEY, payload);
 }
